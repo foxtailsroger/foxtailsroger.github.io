@@ -5,3 +5,8 @@ canvas {
 video {
 		display: none;
 }
+
+body {
+	font-family: arial;
+	background-color: #ffffff;
+}
