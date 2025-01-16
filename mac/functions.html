@@ -1,0 +1,92 @@
+
+function GetFiles(parent){
+  if(!parent)
+    parent = DriveApp.getRootFolder();
+  var files = [];
+  var iter_f = parent.getFiles();
+  while(iter_f.hasNext())
+    files.push(iter_f.next());
+  if(files.length == 0) return null;
+  return files;
+}
+
+/**
+ * CreateFolder
+*/
+function CreateFolder(parent, name){
+  if(!parent)
+    parent = DriveApp.getRootFolder();
+  return parent.createFolder(name);
+}
+/**
+ * OpenDatabase (db)
+ * return a Spreadsheet object when successful
+ * return null if not successful
+ * 
+ * db is a File object
+ */
+function OpenDatabase(db)
+{
+  var ss = SpreadsheetApp.open(db);
+  if (!ss) {
+    Logger.log("open database " + db.getName());
+    return null;
+  }
+  return ss;
+}
+/**
+ * return a file object of the name in string file if found or
+ * return null if file not found
+ */
+function LocateFile(folder, file)
+{
+  if(folder == null) {
+    folder = DriveApp.getRootFolder();
+    Logger.loge("folder = ", folder.getName());
+  }
+  if(file.length) {
+    let iter_f = folder.getFilesByName(file);
+    var current = null;
+    while(iter_f.hasNext()){
+      current = iter_f.next();
+      if(current.getName() == file) {
+        Logger.log("File located " + current.getName());
+        return current;
+      }
+    }
+  }
+  return null;
+}
+/**
+ * this function change the current folder to the folder of request,
+ * the function use '>' as a delineator to separate parent and child folder in the request
+ * 
+ * return a folder if the requested folder existed, otherwise null
+ * param parent: a string of parent function. If parent is null, it starts from the script user's root drive
+ * param target: the requested folder from the parent
+ */
+function ChangeFolder(parent, target)
+{
+  if (parent == null) {
+    parent = DriveApp.getRootFolder();
+    if(parent == null) return null;
+  }
+  var iter_f = null;
+  var visit = target.split(">");
+  
+  Logger.log("visit array has " + visit.length +" members");
+  
+  var current = parent;
+  
+  let i = 0;
+  for( i in visit){
+    let found = false;
+    iter_f = current.getFoldersByName(visit[i]);
+    while(iter_f.hasNext()){
+      current = iter_f.next();
+      if(current.getName() == visit[i]) { found = true; Logger.log("found " + visit[i]); break;}
+    }
+    if(found == false) return null;
+  }
+  return current;
+}
